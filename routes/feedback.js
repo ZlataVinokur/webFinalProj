@@ -17,9 +17,10 @@ router.post('/', async (req, res) => {
         const { name, email, message } = req.body;
         
         if (!name || !email || !message) {
-            return res.status(400).render('feedback', {
+            return res.render('feedback', {
+                title: 'Обратная связь',
                 error: 'Все поля обязательны для заполнения',
-                user: req.session.user
+                success: null
             });
         }
 
@@ -34,7 +35,7 @@ router.post('/', async (req, res) => {
             success: 'Спасибо за ваше сообщение! Мы свяжемся с вами в ближайшее время.'
         });
     } catch (error) {
-        console.error('Ошибка при отправке обратной связи:', error);
+        console.error('Ошибка при сохранении обратной связи:', error);
         res.render('feedback', {
             title: 'Обратная связь',
             error: 'Произошла ошибка при отправке сообщения. Пожалуйста, попробуйте позже.',

@@ -26,12 +26,12 @@ const upload = multer({
     }
 });
 
-// Middleware для проверки авторизации
+// Middleware для проверки прав администратора
 const isAdmin = (req, res, next) => {
     if (req.session.user && req.session.user.is_admin) {
         next();
     } else {
-        res.status(403).redirect('/admin/login');
+        res.status(403).send('Доступ запрещен');
     }
 };
 
@@ -82,17 +82,22 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Панель управления
+// Страница админ-панели
 router.get('/dashboard', isAdmin, async (req, res) => {
     try {
+        // Получаем все эпохи
         const [eras] = await pool.query('SELECT * FROM eras ORDER BY created_at DESC');
-        res.render('admin/dashboard', { 
+        
+        // Получаем все сообщения обратной связи
+        const [feedback] = await pool.query('SELECT * FROM feedback ORDER BY created_at DESC');
+        
+        res.render('admin/dashboard', {
             title: 'Панель управления',
             eras: eras,
-            user: req.session.user
+            feedback: feedback
         });
     } catch (error) {
-        console.error(error);
+        console.error('Ошибка при загрузке админ-панели:', error);
         res.status(500).send('Ошибка сервера');
     }
 });
@@ -207,6 +212,28 @@ router.delete('/eras/:id', isAdmin, async (req, res) => {
         console.error(error);
         res.status(500).json({ error: 'Ошибка сервера' });
     }
+});
+
+// Удаление сообщения обратной связи
+router.delete('/feedback/:id', isAdmin, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM feedback WHERE id = ?', [req.params.id]);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Ошибка при удалении сообщения:', error);
+        res.status(500).json({ error: 'Ошибка при удалении сообщения' });
+    }
+});
+
+// Выход из админ-панели
+router.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Ошибка при выходе:', err);
+            return res.status(500).send('Ошибка при выходе');
+        }
+        res.redirect('/');
+    });
 });
 
 module.exports = router; 
