@@ -1,0 +1,27 @@
+<%- include('partials/header') %>
+
+<div class="container">
+    <h1 class="page-title">Все эпохи</h1>
+    
+    <div class="eras-grid">
+        <% eras.forEach(era => { %>
+            <div class="era-card" data-era="<%= era.title.toLowerCase() %>">
+                <img src="<%= era.image_url %>" alt="<%= era.title %>">
+                <div class="era-card-content">
+                    <h2><%= era.title %></h2>
+                    <p><%= era.description %></p>
+                    <div class="era-tags">
+                        <% if (era.tags && era.tags.length > 0) { %>
+                            <% era.tags.forEach(tag => { %>
+                                <span class="tag"><%= tag %></span>
+                            <% }); %>
+                        <% } %>
+                    </div>
+                    <a href="/eras/<%= era.id %>" class="btn btn-primary">Подробнее</a>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+</div>
+
+<%- include('partials/footer') %> 

@@ -1,0 +1,83 @@
+<%- include('partials/header') %>
+
+<div class="hero">
+    <div class="hero-content">
+        <h1>Эволюция игрового дизайна</h1>
+        <p>Исследуйте историю развития игровой индустрии через призму дизайна</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="eras-grid">
+        <% eras.forEach(era => { %>
+            <div class="era-card" data-era="<%= era.title.toLowerCase() %>">
+                <img src="<%= era.image_url %>" alt="<%= era.title %>">
+                <div class="era-card-content">
+                    <h2><%= era.title %></h2>
+                    <p><%= era.description.substring(0, 150) %>...</p>
+                    <div class="era-tags">
+                        <% if (era.tags && era.tags.length > 0) { %>
+                            <% era.tags.forEach(tag => { %>
+                                <span class="tag"><%= tag %></span>
+                            <% }); %>
+                        <% } %>
+                    </div>
+                    <a href="/eras/<%= era.id %>" class="btn btn-primary">Подробнее</a>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+</div>
+
+<div class="features">
+    <div class="feature-card">
+        <h3>Интерактивное обучение</h3>
+        <p>Изучайте историю игрового дизайна через интерактивные материалы и примеры</p>
+    </div>
+    <div class="feature-card">
+        <h3>Детальный анализ</h3>
+        <p>Погрузитесь в детали каждой эпохи и узнайте о ключевых технологиях и играх</p>
+    </div>
+    <div class="feature-card">
+        <h3>Сообщество</h3>
+        <p>Присоединяйтесь к обсуждению и делитесь своими знаниями</p>
+    </div>
+</div>
+
+<div id="social-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Присоединяйтесь к нам!</h2>
+        <p>Подпишитесь на наши социальные сети, чтобы быть в курсе обновлений</p>
+        <div class="social-buttons">
+            <a href="#" class="social-btn twitter">Twitter</a>
+            <a href="#" class="social-btn facebook">Facebook</a>
+            <a href="#" class="social-btn instagram">Instagram</a>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('social-modal');
+    const closeBtn = document.querySelector('.close');
+    
+    // Проверяем, показывалось ли модальное окно ранее
+    if (!localStorage.getItem('modalShown')) {
+        modal.style.display = 'block';
+        localStorage.setItem('modalShown', 'true');
+    }
+    
+    closeBtn.onclick = function() {
+        modal.style.display = 'none';
+    }
+    
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+});
+</script> 

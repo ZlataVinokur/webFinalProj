@@ -1,0 +1,147 @@
+<%- include('../partials/header') %>
+
+<div class="dashboard">
+    <h1>Панель управления</h1>
+    
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <h3>Всего эпох</h3>
+            <p><%= eras.length %></p>
+        </div>
+    </div>
+
+    <div class="eras-management">
+        <h2>Управление эпохами</h2>
+        <button id="addEraBtn" class="btn btn-primary">Добавить эпоху</button>
+        
+        <div class="eras-list">
+            <% eras.forEach(era => { %>
+                <div class="era-item" data-id="<%= era.id %>">
+                    <div class="era-info">
+                        <h3><%= era.title %></h3>
+                        <p><%= era.description.substring(0, 100) %>...</p>
+                        <div class="era-meta">
+                            <span class="era-years"><%= era.start_year %> - <%= era.end_year %></span>
+                        </div>
+                    </div>
+                    <div class="era-actions">
+                        <a href="/eras/<%= era.id %>" class="btn btn-secondary">Просмотр</a>
+                        <button class="btn btn-primary edit-era">Редактировать</button>
+                        <button class="btn btn-danger delete-era">Удалить</button>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+</div>
+
+<div id="addEraModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Добавить новую эпоху</h2>
+        <form id="addEraForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="title">Название</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Описание</label>
+                <textarea id="description" name="description" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="start_year">Начало периода</label>
+                <input type="number" id="start_year" name="start_year" required>
+            </div>
+            <div class="form-group">
+                <label for="end_year">Конец периода</label>
+                <input type="number" id="end_year" name="end_year" required>
+            </div>
+            <div class="form-group">
+                <label for="tags">Теги (через запятую)</label>
+                <input type="text" id="tags" name="tags">
+            </div>
+            <div class="form-group">
+                <label for="image">Изображение</label>
+                <input type="file" id="image" name="image" accept="image/*">
+            </div>
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addEraBtn = document.getElementById('addEraBtn');
+    const addEraModal = document.getElementById('addEraModal');
+    const closeBtn = addEraModal.querySelector('.close');
+    const addEraForm = document.getElementById('addEraForm');
+    const editButtons = document.querySelectorAll('.edit-era');
+    const deleteButtons = document.querySelectorAll('.delete-era');
+
+    addEraBtn.onclick = function() {
+        addEraModal.style.display = 'block';
+    }
+
+    closeBtn.onclick = function() {
+        addEraModal.style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        if (event.target == addEraModal) {
+            addEraModal.style.display = 'none';
+        }
+    }
+
+    addEraForm.onsubmit = async function(e) {
+        e.preventDefault();
+        const formData = new FormData(addEraForm);
+        
+        try {
+            const response = await fetch('/admin/eras', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Ошибка при добавлении эпохи');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Ошибка при добавлении эпохи');
+        }
+    }
+
+    editButtons.forEach(button => {
+        button.onclick = function() {
+            const eraId = this.closest('.era-item').dataset.id;
+            window.location.href = `/eras/${eraId}`;
+        }
+    });
+
+    deleteButtons.forEach(button => {
+        button.onclick = async function() {
+            const eraId = this.closest('.era-item').dataset.id;
+            if (confirm('Вы уверены, что хотите удалить эту эпоху?')) {
+                try {
+                    const response = await fetch(`/admin/eras/${eraId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        this.closest('.era-item').remove();
+                    } else {
+                        alert('Ошибка при удалении эпохи');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Ошибка при удалении эпохи');
+                }
+            }
+        }
+    });
+});
+</script>
+
+<%- include('../partials/footer') %> 

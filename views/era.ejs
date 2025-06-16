@@ -1,0 +1,107 @@
+<%- include('partials/header') %>
+
+<div class="era-detail" data-era="<%= era.title.toLowerCase() %>">
+    <div class="era-header">
+        <h1><%= era.title %></h1>
+        <span class="era-years"><%= era.start_year %> - <%= era.end_year %></span>
+        <div class="era-tags">
+            <% if (era.tags && era.tags.length > 0) { %>
+                <% era.tags.forEach(tag => { %>
+                    <span class="tag"><%= tag %></span>
+                <% }); %>
+            <% } %>
+        </div>
+    </div>
+
+    <div class="era-content">
+        <div class="era-image">
+            <img src="<%= era.image_url %>" alt="<%= era.title %>">
+        </div>
+        <div class="era-description">
+            <p><%= era.description %></p>
+        </div>
+    </div>
+
+    <% if (user && user.is_admin) { %>
+        <div class="admin-controls">
+            <button id="editEraBtn" class="btn btn-primary">Редактировать</button>
+            <button id="deleteEraBtn" class="btn btn-danger">Удалить</button>
+        </div>
+
+        <div id="editEraModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Редактировать эпоху</h2>
+                <form id="editEraForm">
+                    <input type="hidden" name="id" value="<%= era.id %>">
+                    <div class="form-group">
+                        <label for="title">Название</label>
+                        <input type="text" id="title" name="title" value="<%= era.title %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Описание</label>
+                        <textarea id="description" name="description" required><%= era.description %></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="start_year">Начало периода</label>
+                        <input type="number" id="start_year" name="start_year" value="<%= era.start_year %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="end_year">Конец периода</label>
+                        <input type="number" id="end_year" name="end_year" value="<%= era.end_year %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tags">Теги (через запятую)</label>
+                        <input type="text" id="tags" name="tags" value="<%= era.tags.join(', ') %>">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </form>
+            </div>
+        </div>
+    <% } %>
+
+    <div class="comments-section">
+        <h2>Комментарии</h2>
+        <% if (comments && comments.length > 0) { %>
+            <div class="comments-list">
+                <% comments.forEach(comment => { %>
+                    <div class="comment" data-id="<%= comment.id %>">
+                        <div class="comment-header">
+                            <span class="comment-author"><%= comment.author %></span>
+                            <span class="comment-date"><%= new Date(comment.created_at).toLocaleDateString() %></span>
+                        </div>
+                        <div class="comment-content">
+                            <%= comment.content %>
+                        </div>
+                        <% if (user && user.is_admin) { %>
+                            <div class="comment-actions">
+                                <button class="btn btn-danger delete-comment">Удалить</button>
+                            </div>
+                        <% } %>
+                    </div>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <p>Пока нет комментариев. Будьте первым!</p>
+        <% } %>
+
+        <form id="commentForm" class="comment-form">
+            <div class="form-group">
+                <label for="author">Ваше имя:</label>
+                <input type="text" id="author" name="author" required>
+            </div>
+            <div class="form-group">
+                <label for="content">Комментарий:</label>
+                <textarea id="content" name="content" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Отправить</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const eraId = '<%= era.id %>';
+</script>
+<script src="/js/era.js"></script>
+
+<%- include('partials/footer') %> 

@@ -1,0 +1,18 @@
+<header>
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="logo">Эволюция игрового дизайна</a>
+            <ul class="nav-links">
+                <li><a href="/">Главная</a></li>
+                <li><a href="/eras">Эпохи</a></li>
+                <li><a href="/feedback">Обратная связь</a></li>
+                <% if (user && user.is_admin) { %>
+                    <li><a href="/admin/dashboard">Панель управления</a></li>
+                    <li><a href="/admin/logout">Выйти</a></li>
+                <% } else if (!user) { %>
+                    <li><a href="/admin/login">Вход</a></li>
+                <% } %>
+            </ul>
+        </div>
+    </nav>
+</header> 
