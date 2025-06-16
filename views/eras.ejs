@@ -1,14 +1,62 @@
+<%- contentFor('body') %>
 
 <div class="container">
     <h1 class="page-title">Все эпохи</h1>
     
-    <div class="eras-grid">
+    <div class="filters-section">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Поиск по названию или описанию...">
+        </div>
+        
+        <div class="filters">
+            <div class="filter-group">
+                <label for="tagFilter">Теги:</label>
+                <select id="tagFilter">
+                    <option value="">Все теги</option>
+                    <% 
+                    const allTags = new Set();
+                    eras.forEach(era => {
+                        if (era.tags) {
+                            era.tags.forEach(tag => allTags.add(tag));
+                        }
+                    });
+                    Array.from(allTags).sort().forEach(tag => { %>
+                        <option value="<%= tag %>"><%= tag %></option>
+                    <% }); %>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="sortBy">Сортировка:</label>
+                <select id="sortBy">
+                    <option value="name-asc">По названию (А-Я)</option>
+                    <option value="name-desc">По названию (Я-А)</option>
+                    <option value="year-asc">По году (возрастание)</option>
+                    <option value="year-desc">По году (убывание)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="filter-actions">
+            <button id="applyFilters" class="btn btn-primary">Применить фильтры</button>
+            <button id="resetFilters" class="btn btn-secondary">Сбросить</button>
+        </div>
+    </div>
+
+    <div class="eras-grid" id="erasGrid">
         <% eras.forEach(era => { %>
-            <div class="era-card" data-era="<%= era.title.toLowerCase() %>">
-                <img src="<%= era.image_url %>" alt="<%= era.title %>">
+            <div class="era-card" 
+                data-title="<%= era.title.toLowerCase() %>"
+                data-description="<%= era.description.toLowerCase() %>"
+                data-year="<%= era.start_year %>"
+                data-tags="<%= era.tags ? era.tags.join(',') : '' %>">
+                <div class="era-card-image">
+                    <img src="<%= era.image_url %>" alt="<%= era.title %>">
+                    <div class="era-years"><%= era.start_year %> - <%= era.end_year %></div>
+                </div>
                 <div class="era-card-content">
                     <h2><%= era.title %></h2>
-                    <p><%= era.description %></p>
+                    <p><%= era.description.substring(0, 150) %>...</p>
                     <div class="era-tags">
                         <% if (era.tags && era.tags.length > 0) { %>
                             <% era.tags.forEach(tag => { %>
@@ -21,5 +69,280 @@
             </div>
         <% }); %>
     </div>
+
+    <div id="noResults" class="no-results" style="display: none;">
+        <p>По вашему запросу ничего не найдено</p>
+    </div>
 </div>
+
+<style>
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.page-title {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.filters-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-box {
+    margin-bottom: 20px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.filters {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #666;
+}
+
+.filter-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+}
+
+.eras-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.era-card {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.era-card:hover {
+    transform: translateY(-5px);
+}
+
+.era-card-image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.era-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.era-years {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.era-card-content {
+    padding: 20px;
+}
+
+.era-card-content h2 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 1.5em;
+}
+
+.era-card-content p {
+    color: #666;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.era-tags {
+    margin-bottom: 15px;
+}
+
+.tag {
+    display: inline-block;
+    background: #e9ecef;
+    color: #495057;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+
+.btn-primary {
+    display: inline-block;
+    padding: 8px 16px;
+    background: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.no-results {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-size: 1.2em;
+}
+
+@media (max-width: 768px) {
+    .eras-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .filters {
+        flex-direction: column;
+    }
+    
+    .filter-group {
+        width: 100%;
+    }
+}
+
+.filter-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.btn {
+    font-size: 16px;
+    padding: 10px 20px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const tagFilter = document.getElementById('tagFilter');
+    const sortBy = document.getElementById('sortBy');
+    const applyFiltersBtn = document.getElementById('applyFilters');
+    const resetFiltersBtn = document.getElementById('resetFilters');
+    const erasGrid = document.getElementById('erasGrid');
+    const noResults = document.getElementById('noResults');
+    const eraCards = document.querySelectorAll('.era-card');
+
+    function filterAndSortEras() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedTag = tagFilter.value;
+        const sortValue = sortBy.value;
+        
+        // Фильтрация
+        let visibleCards = Array.from(eraCards).filter(card => {
+            const title = card.dataset.title;
+            const description = card.dataset.description;
+            const tags = card.dataset.tags ? card.dataset.tags.split(',') : [];
+            
+            // Поиск
+            const matchesSearch = searchTerm === '' || 
+                                title.includes(searchTerm) || 
+                                description.includes(searchTerm);
+            
+            // Фильтр по тегу
+            const matchesTag = selectedTag === '' || tags.includes(selectedTag);
+            
+            return matchesSearch && matchesTag;
+        });
+
+        // Сортировка
+        visibleCards.sort((a, b) => {
+            const aTitle = a.querySelector('h2').textContent;
+            const bTitle = b.querySelector('h2').textContent;
+            const aYear = parseInt(a.dataset.year);
+            const bYear = parseInt(b.dataset.year);
+
+            switch(sortValue) {
+                case 'name-asc':
+                    return aTitle.localeCompare(bTitle, 'ru');
+                case 'name-desc':
+                    return bTitle.localeCompare(aTitle, 'ru');
+                case 'year-asc':
+                    return aYear - bYear;
+                case 'year-desc':
+                    return bYear - aYear;
+                default:
+                    return 0;
+            }
+        });
+
+        // Обновление отображения
+        eraCards.forEach(card => card.style.display = 'none');
+        visibleCards.forEach(card => card.style.display = 'block');
+        
+        // Показ/скрытие сообщения "нет результатов"
+        noResults.style.display = visibleCards.length === 0 ? 'block' : 'none';
+    }
+
+    function resetFilters() {
+        searchInput.value = '';
+        tagFilter.value = '';
+        sortBy.value = 'name-asc';
+        filterAndSortEras();
+    }
+
+    // Обработчики событий
+    applyFiltersBtn.addEventListener('click', filterAndSortEras);
+    resetFiltersBtn.addEventListener('click', resetFilters);
+
+    // Инициализация
+    filterAndSortEras();
+});
+</script>
 
