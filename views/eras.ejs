@@ -279,16 +279,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const noResults = document.getElementById('noResults');
     const eraCards = document.querySelectorAll('.era-card');
 
-    function filterAndSortEras() {
+    // Функция фильтрации
+    function filterEras() {
         const searchTerm = searchInput.value.toLowerCase().trim();
-        const selectedTag = tagFilter.value;
-        const sortValue = sortBy.value;
+        const selectedTag = tagFilter.value.toLowerCase();
         
-        // Фильтрация
-        let visibleCards = Array.from(eraCards).filter(card => {
+        eraCards.forEach(card => {
             const title = card.dataset.title;
             const description = card.dataset.description;
-            const tags = card.dataset.tags ? card.dataset.tags.split(',') : [];
+            const cardTags = card.dataset.tags ? card.dataset.tags.toLowerCase().split(',') : [];
             
             // Поиск
             const matchesSearch = searchTerm === '' || 
@@ -296,17 +295,30 @@ document.addEventListener('DOMContentLoaded', function() {
                                 description.includes(searchTerm);
             
             // Фильтр по тегу
-            const matchesTag = selectedTag === '' || tags.includes(selectedTag);
+            const matchesTag = selectedTag === '' || cardTags.includes(selectedTag);
             
-            return matchesSearch && matchesTag;
+            card.style.display = matchesSearch && matchesTag ? 'block' : 'none';
         });
 
-        // Сортировка
-        visibleCards.sort((a, b) => {
-            const aTitle = a.querySelector('h2').textContent;
-            const bTitle = b.querySelector('h2').textContent;
-            const aYear = parseInt(a.dataset.year);
-            const bYear = parseInt(b.dataset.year);
+        // Проверяем, есть ли видимые карточки
+        const visibleCards = Array.from(eraCards).filter(card => card.style.display !== 'none');
+        noResults.style.display = visibleCards.length === 0 ? 'block' : 'none';
+
+        // Применяем сортировку к видимым карточкам
+        sortVisibleEras(visibleCards);
+    }
+
+    // Функция сортировки
+    function sortVisibleEras(visibleCards) {
+        const sortValue = sortBy.value;
+        const container = erasGrid;
+        const cards = Array.from(visibleCards);
+
+        cards.sort((a, b) => {
+            const aTitle = a.querySelector('h2').textContent.toLowerCase();
+            const bTitle = b.querySelector('h2').textContent.toLowerCase();
+            const aYear = parseInt(a.dataset.year) || 0;
+            const bYear = parseInt(b.dataset.year) || 0;
 
             switch(sortValue) {
                 case 'name-asc':
@@ -322,27 +334,29 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Обновление отображения
-        eraCards.forEach(card => card.style.display = 'none');
-        visibleCards.forEach(card => card.style.display = 'block');
-        
-        // Показ/скрытие сообщения "нет результатов"
-        noResults.style.display = visibleCards.length === 0 ? 'block' : 'none';
+        // Перемещаем отсортированные карточки в DOM
+        cards.forEach(card => {
+            container.appendChild(card);
+        });
     }
 
     function resetFilters() {
         searchInput.value = '';
         tagFilter.value = '';
         sortBy.value = 'name-asc';
-        filterAndSortEras();
+        filterEras();
     }
 
     // Обработчики событий
-    applyFiltersBtn.addEventListener('click', filterAndSortEras);
+    applyFiltersBtn.addEventListener('click', filterEras);
     resetFiltersBtn.addEventListener('click', resetFilters);
+    sortBy.addEventListener('change', () => {
+        const visibleCards = Array.from(eraCards).filter(card => card.style.display !== 'none');
+        sortVisibleEras(visibleCards);
+    });
 
     // Инициализация
-    filterAndSortEras();
+    filterEras();
 });
 </script>
 
