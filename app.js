@@ -83,4 +83,4 @@ app.listen(PORT, () => {
     console.log('\x1b[32m%s\x1b[0m', 'Сервер запущен!');
     console.log('\x1b[36m%s\x1b[0m', `Локальный URL: http://localhost:${PORT}`);
     console.log('\x1b[33m%s\x1b[0m', 'Для остановки сервера нажмите Ctrl+C');
-}); 
+});

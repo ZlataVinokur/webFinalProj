@@ -4,18 +4,27 @@ document.addEventListener('DOMContentLoaded', function() {
     if (commentForm) {
         commentForm.onsubmit = async function(e) {
             e.preventDefault();
-            const formData = new FormData(commentForm);
+            
+            const formData = {
+                nickname: document.getElementById('nickname').value,
+                email: document.getElementById('email').value,
+                content: document.getElementById('content').value
+            };
             
             try {
                 const response = await fetch('/feedback/comment/' + eraId, {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
                 });
                 
                 if (response.ok) {
                     window.location.reload();
                 } else {
-                    alert('Ошибка при отправке комментария');
+                    const data = await response.json();
+                    alert(data.error || 'Ошибка при отправке комментария');
                 }
             } catch (error) {
                 console.error('Error:', error);

@@ -86,7 +86,7 @@ router.post('/login', async (req, res) => {
 router.get('/dashboard', isAdmin, async (req, res) => {
     try {
         // Получаем все эпохи
-        const [eras] = await pool.query('SELECT * FROM eras ORDER BY created_at DESC');
+        const [eras] = await pool.query('SELECT id, title, previous_title, description, image_url, start_year, end_year, created_at FROM eras ORDER BY created_at DESC');
         
         // Получаем все сообщения обратной связи
         const [feedback] = await pool.query('SELECT * FROM feedback ORDER BY created_at DESC');
@@ -165,10 +165,14 @@ router.put('/eras/:id', isAdmin, async (req, res) => {
             });
         }
 
+        // Получаем текущее название эпохи
+        const [currentEra] = await pool.query('SELECT title FROM eras WHERE id = ?', [req.params.id]);
+        const currentTitle = currentEra[0].title;
+
         // Обновляем основную информацию об эпохе
         await pool.query(
-            'UPDATE eras SET title = ?, description = ?, start_year = ?, end_year = ? WHERE id = ?',
-            [title, description, start_year, end_year, req.params.id]
+            'UPDATE eras SET title = ?, previous_title = CASE WHEN ? != ? THEN ? ELSE previous_title END, description = ?, start_year = ?, end_year = ? WHERE id = ?',
+            [title, currentTitle, title, currentTitle, description, start_year, end_year, req.params.id]
         );
 
         // Обновляем теги
@@ -222,6 +226,17 @@ router.delete('/feedback/:id', isAdmin, async (req, res) => {
     } catch (error) {
         console.error('Ошибка при удалении сообщения:', error);
         res.status(500).json({ error: 'Ошибка при удалении сообщения' });
+    }
+});
+
+// Удаление комментария
+router.delete('/comments/:id', isAdmin, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM comments WHERE id = ?', [req.params.id]);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Ошибка при удалении комментария:', error);
+        res.status(500).json({ error: 'Ошибка при удалении комментария' });
     }
 });
 

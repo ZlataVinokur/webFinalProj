@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS eras (
     id INT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(100) NOT NULL,
+    previous_title VARCHAR(100),
     description TEXT NOT NULL,
     image_url VARCHAR(255),
     start_year INT,
@@ -33,6 +34,8 @@ CREATE TABLE IF NOT EXISTS era_tags (
     PRIMARY KEY (era_id, tag_id)
 );
 
+-- Пересоздание таблицы comments
+DROP TABLE IF EXISTS comments;
 CREATE TABLE IF NOT EXISTS comments (
     id INT PRIMARY KEY AUTO_INCREMENT,
     era_id INT,
